@@ -678,6 +678,99 @@ namespace pegasus
         return true;
     }
 
+    template <typename XLEN> void PegasusState::updateCycleCsrs()
+    {
+        if constexpr (std::is_same_v<XLEN, RV64>)
+        {
+            WRITE_CSR_REG<XLEN>(this, CYCLE, getSimState()->cycles);
+            WRITE_CSR_REG<XLEN>(this, MCYCLE, getSimState()->cycles);
+        }
+        else
+        {
+            const XLEN cycle_val = getSimState()->cycles & ((1ull << 32) - 1);
+            const XLEN cycleh_val = getSimState()->cycles >> 32;
+            WRITE_CSR_REG<XLEN>(this, CYCLE, cycle_val);
+            WRITE_CSR_REG<XLEN>(this, CYCLEH, cycleh_val);
+            WRITE_CSR_REG<XLEN>(this, MCYCLE, cycle_val);
+            WRITE_CSR_REG<XLEN>(this, MCYCLEH, cycleh_val);
+        }
+    }
+
+    template <typename XLEN> void PegasusState::updateTimeCsrs()
+    {
+        const auto start = pegasus_core_->getSimStartTime();
+        const auto end = std::chrono::system_clock::system_clock::now();
+        const auto sim_time =
+            std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+
+        if constexpr (std::is_same_v<XLEN, RV64>)
+        {
+            WRITE_CSR_REG<XLEN>(this, TIME, sim_time);
+        }
+        else
+        {
+            const XLEN instret_val = sim_time & ((1ull << 32) - 1);
+            const XLEN instreth_val = sim_time >> 32;
+            WRITE_CSR_REG<XLEN>(this, TIME, instret_val);
+            WRITE_CSR_REG<XLEN>(this, TIMEH, instreth_val);
+        }
+    }
+
+    template <typename XLEN> void PegasusState::updateInstretCsrs()
+    {
+        if constexpr (std::is_same_v<XLEN, RV64>)
+        {
+            WRITE_CSR_REG<XLEN>(this, INSTRET, getSimState()->inst_count);
+            WRITE_CSR_REG<XLEN>(this, MINSTRET, getSimState()->inst_count);
+        }
+        else
+        {
+            const XLEN instret_val = getSimState()->inst_count & ((1ull << 32) - 1);
+            const XLEN instreth_val = getSimState()->inst_count >> 32;
+            WRITE_CSR_REG<XLEN>(this, INSTRET, instret_val);
+            WRITE_CSR_REG<XLEN>(this, INSTRETH, instreth_val);
+            WRITE_CSR_REG<XLEN>(this, MINSTRET, instret_val);
+            WRITE_CSR_REG<XLEN>(this, MINSTRETH, instreth_val);
+        }
+    }
+
+    template void PegasusState::updateCycleCsrs<RV64>();
+    template void PegasusState::updateTimeCsrs<RV64>();
+    template void PegasusState::updateInstretCsrs<RV64>();
+    template void PegasusState::updateCycleCsrs<RV32>();
+    template void PegasusState::updateTimeCsrs<RV32>();
+    template void PegasusState::updateInstretCsrs<RV32>();
+
+    void PegasusState::stopSim(const int64_t exit_code)
+    {
+        std::cout << "Stopping hart" << std::dec << hart_id_ << std::endl;
+
+        if (xlen_ == 64)
+        {
+            updateCycleCsrs<RV64>();
+            updateTimeCsrs<RV64>();
+            updateInstretCsrs<RV64>();
+            std::cout << "\tCYCLE: " << getCsrRegister(CYCLE)->dmiRead<RV64>() << std::endl;
+            std::cout << "\tTIME: " << getCsrRegister(TIME)->dmiRead<RV64>() << std::endl;
+            std::cout << "\tINSTRET: " << getCsrRegister(INSTRET)->dmiRead<RV64>() << std::endl;
+        }
+        else
+        {
+            updateCycleCsrs<RV32>();
+            updateTimeCsrs<RV32>();
+            updateInstretCsrs<RV32>();
+            std::cout << "\tCYCLE: " << getCsrRegister(CYCLE)->dmiRead<RV32>() << std::endl;
+            std::cout << "\tTIME: " << getCsrRegister(TIME)->dmiRead<RV32>() << std::endl;
+            std::cout << "\tINSTRET: " << getCsrRegister(INSTRET)->dmiRead<RV32>() << std::endl;
+        }
+
+        sim_state_.workload_exit_code = exit_code;
+        sim_state_.test_passed = (exit_code == 0) ? true : false;
+        sim_state_.sim_stopped = true;
+
+        finish_action_group_.setNextActionGroup(&stop_sim_action_group_);
+    }
+
     // Initialize a program stack (argc, argv, envp, auxv, etc)
     // Useful info about ELF binaries: https://lwn.net/Articles/631631/
     // This is used mostly for system call emulation

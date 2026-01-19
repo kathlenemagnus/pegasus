@@ -56,20 +56,7 @@ namespace pegasus
     Action::ItrType RvzicntrInsts::cyclePreUpdateHandler_(pegasus::PegasusState* state,
                                                           Action::ItrType action_it)
     {
-        if constexpr (std::is_same_v<XLEN, RV64>)
-        {
-            WRITE_CSR_REG<XLEN>(state, CYCLE, state->getSimState()->cycles);
-            WRITE_CSR_REG<XLEN>(state, MCYCLE, state->getSimState()->cycles);
-        }
-        else
-        {
-            const XLEN cycle_val = state->getSimState()->cycles & ((1ull << 32) - 1);
-            const XLEN cycleh_val = state->getSimState()->cycles >> 32;
-            WRITE_CSR_REG<XLEN>(state, CYCLE, cycle_val);
-            WRITE_CSR_REG<XLEN>(state, CYCLEH, cycleh_val);
-            WRITE_CSR_REG<XLEN>(state, MCYCLE, cycle_val);
-            WRITE_CSR_REG<XLEN>(state, MCYCLEH, cycleh_val);
-        }
+        state->updateCycleCsrs<XLEN>();
         return ++action_it;
     }
 
@@ -77,9 +64,7 @@ namespace pegasus
     Action::ItrType RvzicntrInsts::timePreUpdateHandler_(pegasus::PegasusState* state,
                                                          Action::ItrType action_it)
     {
-        // FIXME: Need to get a sim start time from somewhere...
-        (void)state;
-        // WRITE_CSR_REG<XLEN>(state, TIME, state->getSimState()->cycles);
+        state->updateTimeCsrs<XLEN>();
         return ++action_it;
     }
 
@@ -87,20 +72,7 @@ namespace pegasus
     Action::ItrType RvzicntrInsts::instretPreUpdateHandler_(pegasus::PegasusState* state,
                                                             Action::ItrType action_it)
     {
-        if constexpr (std::is_same_v<XLEN, RV64>)
-        {
-            WRITE_CSR_REG<XLEN>(state, INSTRET, state->getSimState()->inst_count);
-            WRITE_CSR_REG<XLEN>(state, MINSTRET, state->getSimState()->inst_count);
-        }
-        else
-        {
-            const XLEN instret_val = state->getSimState()->inst_count & ((1ull << 32) - 1);
-            const XLEN instreth_val = state->getSimState()->inst_count >> 32;
-            WRITE_CSR_REG<XLEN>(state, INSTRET, instret_val);
-            WRITE_CSR_REG<XLEN>(state, INSTRETH, instreth_val);
-            WRITE_CSR_REG<XLEN>(state, MINSTRET, instret_val);
-            WRITE_CSR_REG<XLEN>(state, MINSTRETH, instreth_val);
-        }
+        state->updateInstretCsrs<XLEN>();
         return ++action_it;
     }
 } // namespace pegasus

@@ -68,7 +68,7 @@ namespace pegasus
         // Not default -- defined in source file to reduce massive inlining
         virtual ~PegasusCore();
 
-        void boot();
+        void boot(const std::chrono::time_point<std::chrono::system_clock> & sim_start_time);
 
         void stopSim(const int64_t exit_code);
 
@@ -79,6 +79,11 @@ namespace pegasus
         PegasusState* getPegasusState(HartId hart_idx = 0) const { return threads_.at(hart_idx); }
 
         std::map<HartId, PegasusState*> & getThreads() { return threads_; }
+
+        const std::chrono::time_point<std::chrono::system_clock> getSimStartTime() const
+        {
+            return sim_start_time_;
+        }
 
         PegasusSystem* getSystem() const { return system_; }
 
@@ -198,6 +203,9 @@ namespace pegasus
         // Execute the threads on this core
         void advanceSim_();
         sparta::Event<> ev_advance_sim_;
+
+        // Simulation start time
+        std::chrono::time_point<std::chrono::system_clock> sim_start_time_;
 
         // Pause counter
         const uint64_t pause_counter_duration_;

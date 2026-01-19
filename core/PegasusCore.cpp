@@ -165,8 +165,10 @@ namespace pegasus
 
     PegasusCore::~PegasusCore() {}
 
-    void PegasusCore::boot()
+    void
+    PegasusCore::boot(const std::chrono::time_point<std::chrono::system_clock> & sim_start_time)
     {
+        sim_start_time_ = sim_start_time;
         for (auto & [hart_idx, thread] : threads_)
         {
             thread->boot();

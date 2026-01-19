@@ -284,14 +284,13 @@ namespace pegasus
 
         Exception* getExceptionUnit() const { return exception_unit_; }
 
-        void stopSim(const int64_t exit_code)
-        {
-            sim_state_.workload_exit_code = exit_code;
-            sim_state_.test_passed = (exit_code == 0) ? true : false;
-            sim_state_.sim_stopped = true;
+        template <typename XLEN> void updateCycleCsrs();
 
-            finish_action_group_.setNextActionGroup(&stop_sim_action_group_);
-        }
+        template <typename XLEN> void updateTimeCsrs();
+
+        template <typename XLEN> void updateInstretCsrs();
+
+        void stopSim(const int64_t exit_code);
 
         template <bool IS_UNIT_TEST = false> bool compare(const PegasusState* state) const;
 
