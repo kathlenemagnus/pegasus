@@ -196,8 +196,8 @@ See [Python IDE for Pegasus](IDE/README.md)
 | **C** Compressed instructions. | :white_check_mark: |
 | **B** Bit-manipulation instructions. | :white_check_mark: |
 | **Zicsr** CSR instructions. These are implied by presence of F. | :white_check_mark: |
-| **Zicntr** Base counters and timers. | :x: |
-| **Zihpm** Hardware performance counters. | :x: |
+| **Zicntr** Base counters and timers. | :white_check_mark: |
+| **Zihpm** Hardware performance counters. | :white_check_mark: |
 | **Ziccif** Main memory regions with both the cacheability and coherence PMAs must support instruction fetch, and any instruction fetches of naturally aligned power-of-2 sizes up to min(ILEN,XLEN) (i.e., 32 bits for RVA23) are atomic. | :x: |
 | **Ziccrse** Main memory regions with both the cacheability and coherence PMAs must support RsrvEventual. | :x: |
 | **Ziccamoa** Main memory regions with both the cacheability and coherence PMAs must support all atomics in A. | :x: |
