@@ -10,6 +10,7 @@ target_link_libraries(pegasusinsts
     rvb
     rvv
     rvzicsr
+    rvzicntr
     rvzifencei
     rvzihintpause
     rvzicond
@@ -30,6 +31,7 @@ add_subdirectory(f)
 add_subdirectory(d)
 add_subdirectory(b)
 add_subdirectory(zicsr)
+add_subdirectory(zicntr)
 add_subdirectory(zifencei)
 add_subdirectory(zihintpause)
 add_subdirectory(zicond)

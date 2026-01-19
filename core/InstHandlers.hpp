@@ -56,6 +56,19 @@ namespace pegasus
             }
         }
 
+        template <typename XLEN> const CsrUpdateActionsMap* getCsrPreUpdateActionsMap() const
+        {
+            static_assert(std::is_same_v<XLEN, RV64> || std::is_same_v<XLEN, RV32>);
+            if constexpr (std::is_same_v<XLEN, RV64>)
+            {
+                return &rv64_csr_pre_update_actions_;
+            }
+            else
+            {
+                return &rv32_csr_pre_update_actions_;
+            }
+        }
+
       private:
         // Instruction handlers
         InstHandlersMap rv64_inst_actions_;
@@ -68,6 +81,10 @@ namespace pegasus
         // CSR update Actions for executing write side effects
         CsrUpdateActionsMap rv64_csr_update_actions_;
         CsrUpdateActionsMap rv32_csr_update_actions_;
+
+        // CSR pre-update Actions TODO
+        CsrUpdateActionsMap rv64_csr_pre_update_actions_;
+        CsrUpdateActionsMap rv32_csr_pre_update_actions_;
 
         // Instruction handler for unsupported instructions
         Action::ItrType unsupportedInstHandler_(pegasus::PegasusState* state,

@@ -11,6 +11,7 @@
 #include "core/inst_handlers/i/RviInsts.hpp"
 #include "core/inst_handlers/m/RvmInsts.hpp"
 #include "core/inst_handlers/zicsr/RvzicsrInsts.hpp"
+#include "core/inst_handlers/zicntr/RvzicntrInsts.hpp"
 #include "core/inst_handlers/zifencei/RvzifenceiInsts.hpp"
 #include "core/inst_handlers/zihintpause/RvzihintpauseInsts.hpp"
 #include "core/inst_handlers/zicond/RvzicondInsts.hpp"
@@ -140,9 +141,11 @@ namespace pegasus
         //  RV32 only
         RvzilsdInsts::getInstComputeAddressHandlers<RV32>(rv32_inst_compute_address_actions_);
 
-        // Get CSR update handlers
+        // Get CSR update and pre-update handlers
         RvzicsrInsts::getCsrUpdateActions<RV64>(rv64_csr_update_actions_);
         RvzicsrInsts::getCsrUpdateActions<RV32>(rv32_csr_update_actions_);
+        RvzicntrInsts::getCsrPreUpdateActions<RV64>(rv64_csr_pre_update_actions_);
+        RvzicntrInsts::getCsrPreUpdateActions<RV32>(rv32_csr_pre_update_actions_);
     }
 
     template const InstHandlers::InstHandlersMap* InstHandlers::getInstHandlersMap<RV64>() const;
