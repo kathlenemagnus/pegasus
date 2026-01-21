@@ -27,15 +27,15 @@ namespace pegasus
 
     void PegasusSim::run(uint64_t run_time)
     {
-        const auto start = std::chrono::system_clock::system_clock::now();
         for (auto & [core_idx, core] : cores_)
         {
-            core->boot(start);
+            core->boot();
         }
 
         getSimulationConfiguration()->scheduler_exacting_run = true;
         getSimulationConfiguration()->scheduler_measure_run_time = false;
         sparta::app::Simulation::run(run_time);
+        const auto start = std::chrono::system_clock::system_clock::now();
         const auto end = std::chrono::system_clock::system_clock::now();
         const auto sim_time =
             std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();

@@ -158,6 +158,19 @@ namespace pegasus
 
         SimState* getSimState() { return &sim_state_; }
 
+        struct CachedCsrs
+        {
+            uint64_t cycle = 0;
+            uint64_t mcycle = 0;
+            uint64_t time = 0;
+            uint64_t instret = 0;
+            uint64_t minstret = 0;
+        };
+
+        const CachedCsrs* getCachedCsrs() const { return &cached_csrs_; }
+
+        CachedCsrs* getCachedCsrs() { return &cached_csrs_; }
+
         void pauseHart(const SimPauseReason reason);
 
         void unpauseHart();
@@ -381,6 +394,9 @@ namespace pegasus
 
         //! Simulation state
         SimState sim_state_;
+
+        //! Cached CSRs
+        CachedCsrs cached_csrs_;
 
         //! Vector state
         VectorConfig vector_config_;

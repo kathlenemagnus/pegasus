@@ -510,10 +510,17 @@ namespace pegasus
 
         // Increment instruction count
         ++sim_state_.inst_count;
+        ++cached_csrs_.instret;
+        ++cached_csrs_.minstret;
 
         // TODO: We don't have a timing model yet so
         // for now just assume each inst takes 1 cycle
         ++sim_state_.cycles;
+        ++cached_csrs_.cycle;
+        ++cached_csrs_.mcycle;
+
+        // Time
+        ++cached_csrs_.time;
 
         if constexpr (CHECK_ILIMIT)
         {
@@ -682,37 +689,38 @@ namespace pegasus
     {
         if constexpr (std::is_same_v<XLEN, RV64>)
         {
-            WRITE_CSR_REG<XLEN>(this, CYCLE, getSimState()->cycles);
-            WRITE_CSR_REG<XLEN>(this, MCYCLE, getSimState()->cycles);
+            WRITE_CSR_REG<XLEN>(this, CYCLE, cached_csrs_.cycle);
+            WRITE_CSR_REG<XLEN>(this, MCYCLE, cached_csrs_.mcycle);
         }
         else
         {
-            const XLEN cycle_val = getSimState()->cycles & ((1ull << 32) - 1);
-            const XLEN cycleh_val = getSimState()->cycles >> 32;
+            const XLEN cycle_val = cached_csrs_.cycle & ((1ull << 32) - 1);
+            const XLEN cycleh_val = cached_csrs_.cycle >> 32;
             WRITE_CSR_REG<XLEN>(this, CYCLE, cycle_val);
             WRITE_CSR_REG<XLEN>(this, CYCLEH, cycleh_val);
-            WRITE_CSR_REG<XLEN>(this, MCYCLE, cycle_val);
-            WRITE_CSR_REG<XLEN>(this, MCYCLEH, cycleh_val);
+            const XLEN mcycle_val = cached_csrs_.mcycle & ((1ull << 32) - 1);
+            const XLEN mcycleh_val = cached_csrs_.mcycle >> 32;
+            WRITE_CSR_REG<XLEN>(this, MCYCLE, mcycle_val);
+            WRITE_CSR_REG<XLEN>(this, MCYCLEH, mcycleh_val);
         }
     }
 
     template <typename XLEN> void PegasusState::updateTimeCsrs()
     {
-        const auto start = pegasus_core_->getSimStartTime();
-        const auto end = std::chrono::system_clock::system_clock::now();
-        const auto sim_time =
-            std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-
+        // From the RISC-V spec:
+        // On some simple platforms, cycle count might represent a valid
+        // implementation of RDTIME, in which case RDTIME and RDCYCLE
+        // may return the same result.
         if constexpr (std::is_same_v<XLEN, RV64>)
         {
-            WRITE_CSR_REG<XLEN>(this, TIME, sim_time);
+            WRITE_CSR_REG<XLEN>(this, TIME, cached_csrs_.time);
         }
         else
         {
-            const XLEN instret_val = sim_time & ((1ull << 32) - 1);
-            const XLEN instreth_val = sim_time >> 32;
-            WRITE_CSR_REG<XLEN>(this, TIME, instret_val);
-            WRITE_CSR_REG<XLEN>(this, TIMEH, instreth_val);
+            const XLEN time_val = cached_csrs_.time & ((1ull << 32) - 1);
+            const XLEN timeh_val = cached_csrs_.time >> 32;
+            WRITE_CSR_REG<XLEN>(this, TIME, time_val);
+            WRITE_CSR_REG<XLEN>(this, TIMEH, timeh_val);
         }
     }
 
@@ -720,17 +728,19 @@ namespace pegasus
     {
         if constexpr (std::is_same_v<XLEN, RV64>)
         {
-            WRITE_CSR_REG<XLEN>(this, INSTRET, getSimState()->inst_count);
-            WRITE_CSR_REG<XLEN>(this, MINSTRET, getSimState()->inst_count);
+            WRITE_CSR_REG<XLEN>(this, INSTRET, cached_csrs_.instret);
+            WRITE_CSR_REG<XLEN>(this, MINSTRET, cached_csrs_.minstret);
         }
         else
         {
-            const XLEN instret_val = getSimState()->inst_count & ((1ull << 32) - 1);
-            const XLEN instreth_val = getSimState()->inst_count >> 32;
+            const XLEN instret_val = cached_csrs_.instret & ((1ull << 32) - 1);
+            const XLEN instreth_val = cached_csrs_.instret >> 32;
             WRITE_CSR_REG<XLEN>(this, INSTRET, instret_val);
             WRITE_CSR_REG<XLEN>(this, INSTRETH, instreth_val);
-            WRITE_CSR_REG<XLEN>(this, MINSTRET, instret_val);
-            WRITE_CSR_REG<XLEN>(this, MINSTRETH, instreth_val);
+            const XLEN minstret_val = cached_csrs_.minstret & ((1ull << 32) - 1);
+            const XLEN minstreth_val = cached_csrs_.minstret >> 32;
+            WRITE_CSR_REG<XLEN>(this, MINSTRET, minstret_val);
+            WRITE_CSR_REG<XLEN>(this, MINSTRETH, minstreth_val);
         }
     }
 
