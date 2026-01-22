@@ -158,14 +158,7 @@ namespace pegasus
 
         SimState* getSimState() { return &sim_state_; }
 
-        struct CachedCsrs
-        {
-            uint64_t cycle = 0;
-            uint64_t mcycle = 0;
-            uint64_t time = 0;
-            uint64_t instret = 0;
-            uint64_t minstret = 0;
-        };
+        using CachedCsrs = std::map<uint32_t, uint64_t>;
 
         const CachedCsrs* getCachedCsrs() const { return &cached_csrs_; }
 
@@ -395,8 +388,10 @@ namespace pegasus
         //! Simulation state
         SimState sim_state_;
 
-        //! Cached CSRs
-        CachedCsrs cached_csrs_;
+        //! Cached CSRs, indexed by CSR number
+        std::map<uint32_t, uint64_t> cached_csrs_{
+            {CYCLE, 0}, {MCYCLE, 0}, {TIME, 0}, {INSTRET, 0}, {MINSTRET, 0},
+        };
 
         //! Vector state
         VectorConfig vector_config_;

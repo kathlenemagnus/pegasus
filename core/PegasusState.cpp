@@ -510,17 +510,17 @@ namespace pegasus
 
         // Increment instruction count
         ++sim_state_.inst_count;
-        ++cached_csrs_.instret;
-        ++cached_csrs_.minstret;
+        ++cached_csrs_.at(INSTRET);
+        ++cached_csrs_.at(MINSTRET);
 
         // TODO: We don't have a timing model yet so
         // for now just assume each inst takes 1 cycle
         ++sim_state_.cycles;
-        ++cached_csrs_.cycle;
-        ++cached_csrs_.mcycle;
+        ++cached_csrs_.at(CYCLE);
+        ++cached_csrs_.at(MCYCLE);
 
         // Time
-        ++cached_csrs_.time;
+        ++cached_csrs_.at(TIME);
 
         if constexpr (CHECK_ILIMIT)
         {
@@ -689,17 +689,17 @@ namespace pegasus
     {
         if constexpr (std::is_same_v<XLEN, RV64>)
         {
-            WRITE_CSR_REG<XLEN>(this, CYCLE, cached_csrs_.cycle);
-            WRITE_CSR_REG<XLEN>(this, MCYCLE, cached_csrs_.mcycle);
+            WRITE_CSR_REG<XLEN>(this, CYCLE, cached_csrs_.at(CYCLE));
+            WRITE_CSR_REG<XLEN>(this, MCYCLE, cached_csrs_.at(MCYCLE));
         }
         else
         {
-            const XLEN cycle_val = cached_csrs_.cycle & ((1ull << 32) - 1);
-            const XLEN cycleh_val = cached_csrs_.cycle >> 32;
+            const XLEN cycle_val = cached_csrs_.at(CYCLE) & ((1ull << 32) - 1);
+            const XLEN cycleh_val = cached_csrs_.at(CYCLE) >> 32;
             WRITE_CSR_REG<XLEN>(this, CYCLE, cycle_val);
             WRITE_CSR_REG<XLEN>(this, CYCLEH, cycleh_val);
-            const XLEN mcycle_val = cached_csrs_.mcycle & ((1ull << 32) - 1);
-            const XLEN mcycleh_val = cached_csrs_.mcycle >> 32;
+            const XLEN mcycle_val = cached_csrs_.at(MCYCLE) & ((1ull << 32) - 1);
+            const XLEN mcycleh_val = cached_csrs_.at(MCYCLE) >> 32;
             WRITE_CSR_REG<XLEN>(this, MCYCLE, mcycle_val);
             WRITE_CSR_REG<XLEN>(this, MCYCLEH, mcycleh_val);
         }
@@ -713,12 +713,12 @@ namespace pegasus
         // may return the same result.
         if constexpr (std::is_same_v<XLEN, RV64>)
         {
-            WRITE_CSR_REG<XLEN>(this, TIME, cached_csrs_.time);
+            WRITE_CSR_REG<XLEN>(this, TIME, cached_csrs_.at(TIME));
         }
         else
         {
-            const XLEN time_val = cached_csrs_.time & ((1ull << 32) - 1);
-            const XLEN timeh_val = cached_csrs_.time >> 32;
+            const XLEN time_val = cached_csrs_.at(TIME) & ((1ull << 32) - 1);
+            const XLEN timeh_val = cached_csrs_.at(TIME) >> 32;
             WRITE_CSR_REG<XLEN>(this, TIME, time_val);
             WRITE_CSR_REG<XLEN>(this, TIMEH, timeh_val);
         }
@@ -728,17 +728,17 @@ namespace pegasus
     {
         if constexpr (std::is_same_v<XLEN, RV64>)
         {
-            WRITE_CSR_REG<XLEN>(this, INSTRET, cached_csrs_.instret);
-            WRITE_CSR_REG<XLEN>(this, MINSTRET, cached_csrs_.minstret);
+            WRITE_CSR_REG<XLEN>(this, INSTRET, cached_csrs_.at(INSTRET));
+            WRITE_CSR_REG<XLEN>(this, MINSTRET, cached_csrs_.at(MINSTRET));
         }
         else
         {
-            const XLEN instret_val = cached_csrs_.instret & ((1ull << 32) - 1);
-            const XLEN instreth_val = cached_csrs_.instret >> 32;
+            const XLEN instret_val = cached_csrs_.at(INSTRET) & ((1ull << 32) - 1);
+            const XLEN instreth_val = cached_csrs_.at(INSTRET) >> 32;
             WRITE_CSR_REG<XLEN>(this, INSTRET, instret_val);
             WRITE_CSR_REG<XLEN>(this, INSTRETH, instreth_val);
-            const XLEN minstret_val = cached_csrs_.minstret & ((1ull << 32) - 1);
-            const XLEN minstreth_val = cached_csrs_.minstret >> 32;
+            const XLEN minstret_val = cached_csrs_.at(MINSTRET) & ((1ull << 32) - 1);
+            const XLEN minstreth_val = cached_csrs_.at(MINSTRET) >> 32;
             WRITE_CSR_REG<XLEN>(this, MINSTRET, minstret_val);
             WRITE_CSR_REG<XLEN>(this, MINSTRETH, minstreth_val);
         }

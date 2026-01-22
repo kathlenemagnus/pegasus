@@ -146,6 +146,8 @@ namespace pegasus
         RvzicsrInsts::getCsrUpdateActions<RV32>(rv32_csr_update_actions_);
         RvzicntrInsts::getCsrPreUpdateActions<RV64>(rv64_csr_pre_update_actions_);
         RvzicntrInsts::getCsrPreUpdateActions<RV32>(rv32_csr_pre_update_actions_);
+        RvzicntrInsts::getCsrPostUpdateActions<RV64>(rv64_csr_pre_update_actions_);
+        RvzicntrInsts::getCsrPostUpdateActions<RV32>(rv32_csr_pre_update_actions_);
     }
 
     template const InstHandlers::InstHandlersMap* InstHandlers::getInstHandlersMap<RV64>() const;
