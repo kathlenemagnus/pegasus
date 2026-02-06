@@ -369,22 +369,35 @@ namespace pegasus
         std::cout << "Loading binary at address 0x" << std::hex << load_addr << ": " << binary
                   << std::endl;
 
-        // Open binary file
-        int fd = open(binary.c_str(), O_RDONLY);
-        sparta_assert(fd != -1, "Failed to open binary file: " << binary);
+        // Open file
+        std::ifstream file_data(binary, std::ios::binary);
+        sparta_assert(file_data.is_open(), "Failed to open binary file: " << binary);
 
         // Determine file size
+        constexpr uint64_t SIZE_1MB = 1048576;
         const uint64_t file_size = std::filesystem::file_size(binary);
 
         // Write file to memory
-        void* data = mmap(NULL, file_size, PROT_READ, MAP_SHARED, fd, 0);
-        bool success =
-            memory_map_->tryPoke(load_addr, file_size, static_cast<const uint8_t*>(data));
-        if (!success)
+        uint64_t addr = load_addr;
+        while (file_data.eof() == false)
         {
-            std::cout << "FAILED!\n";
+            std::vector<char> bin_data(SIZE_1MB);
+            file_data.read(bin_data.data(), SIZE_1MB);
+            std::cout << "File size: " << std::dec << file_size << std::endl;
+            std::cout << "0x" << std::hex << addr << std::endl;
+            std::cout << "0x" << std::hex << (load_addr + file_size) << std::endl;
+            const uint64_t size =
+                (addr + SIZE_1MB) > (load_addr + file_size) ? (file_size % SIZE_1MB) : SIZE_1MB;
+            std::cout << "Writing " << std::dec << size << " bytes to 0x" << std::hex << addr
+                      << std::endl;
+            const bool success =
+                memory_map_->tryPoke(addr, size, reinterpret_cast<uint8_t*>(bin_data.data()));
+            if (!success)
+            {
+                std::cout << "FAILED!\n";
+            }
+            addr += SIZE_1MB;
         }
-        close(fd);
 
         if (starting_pc_.isValid() == false)
         {
