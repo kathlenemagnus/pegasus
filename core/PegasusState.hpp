@@ -4,6 +4,7 @@
 #include "core/PegasusInst.hpp"
 #include "core/VectorConfig.hpp"
 #include "core/Trap.hpp"
+#include "core/ExecutionCache.hpp"
 
 #include "arch/RegisterSet.hpp"
 #include "arch/gen/supportedISA.hpp"
@@ -448,7 +449,9 @@ namespace pegasus
 
         ActionGroup* getNextCycleResetActionGroup();
 
-        bool isEcacheEnabled() const { return ecache_enabled_; }
+        bool isEcacheEnabled() const { return ecache_.isEnabled(); }
+
+        ExecutionCache* getExecutionCache() { return &ecache_; }
 
         ActionGroup* getStopSimActionGroup() { return &stop_sim_action_group_; }
 
@@ -519,11 +522,8 @@ namespace pegasus
         //! Stop simulatiion on WFI
         const bool stop_sim_on_wfi_;
 
-        //! Whether the execution cache (ecache) fast path is enabled
-        bool ecache_enabled_ = false;
-
-        //! Print execution-cache counter summary when simulation stops
-        const bool ecache_stats_;
+        //! Execution cache (ecache) fast path is enabled
+        ExecutionCache ecache_;
 
         //! Typical stack size for system call emulation
         const uint64_t ulimit_stack_size_;

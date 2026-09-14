@@ -103,7 +103,7 @@ namespace pegasus
         ilimit_(getInstLimit(hart_tn->getRoot(), p->ilimit)),
         quantum_(p->quantum),
         stop_sim_on_wfi_(p->stop_sim_on_wfi),
-        ecache_stats_(p->ecache_stats),
+        ecache_(p->ecache_stats),
         ulimit_stack_size_(p->ulimit_stack_size),
         stf_filename_(p->stf_filename),
         stf_opcode_trigger_(p->stf_opcode_trigger),
@@ -312,9 +312,10 @@ namespace pegasus
         translate_unit_ = hart_tn->getChild("translate")->getResourceAs<Translate*>();
         exception_unit_ = hart_tn->getChild("exception")->getResourceAs<Exception*>();
 
-        ecache_enabled_ = fetch_unit_->isEcacheEnabled();
-        if (ecache_enabled_)
+        if (fetch_unit_->isEcacheEnabled())
         {
+            ecache_.enable();
+
             // When Ecache is enabled, wire finish -> nextCycleReset -> Translate.
             // NCR owns the sim_state->reset() call
             ActionGroup* ncr_group = execute_unit_->getNextCycleResetActionGroup();
@@ -494,7 +495,7 @@ namespace pegasus
         }
 
         // Translation-context changes can invalidate decoded execute-page assumptions.
-        flushExecutionCache();
+        ecache_.flushExecutionCache();
     }
 
     void PegasusState::pauseHart(const SimPauseReason reason)
@@ -507,7 +508,7 @@ namespace pegasus
     {
         sim_state_.sim_pause_reason = SimPauseReason::INVALID;
         // Restore finish → NCR (ecache on) or finish → fetch (ecache off).
-        finish_action_group_.setNextActionGroup(ecache_enabled_
+        finish_action_group_.setNextActionGroup(ecache_.isEnabled()
                                                     ? execute_unit_->getNextCycleResetActionGroup()
                                                     : fetch_unit_->getActionGroup());
     }
@@ -1065,25 +1066,9 @@ namespace pegasus
             sim_state_.workload_exit_code = exit_code;
             sim_state_.test_passed = (exit_code == 0) ? true : false;
 
-            if (ecache_stats_)
+            if (ecache_.areStatsEnabled())
             {
-                const uint64_t reuse_count = getExecCacheReuseCount();
-                const uint64_t first_decode_count = getExecCacheFirstDecodeCount();
-                const uint64_t total_decisions = reuse_count + first_decode_count;
-                std::cout << "Execution Cache statistics" << std::endl;
-                std::cout << "\tExecCache decisions: " << total_decisions
-                          << " (reuse=" << reuse_count << ", first_decode = " << first_decode_count
-                          << ")" << std::endl;
-                std::cout << "\tExecCache reuse ratio: " << getExecCacheReuseRatio() << std::endl;
-                std::cout << "\tExecCache bypass: enter = " << getExecCacheBypassEnterCount()
-                          << ", fallback = " << getExecCacheBypassFallbackCount()
-                          << ", pTE_setup = " << getExecCachePteBypassSetupCount() << std::endl;
-                std::cout << "\tTranslation requests: " << getTranslationRequestCount()
-                          << std::endl;
-                std::cout << "\tTranslation bypass (machine/baremetal): "
-                          << getTranslationBypassCount() << std::endl;
-                std::cout << "\tMMU page-walk translations: " << getPageWalkTranslationCount()
-                          << std::endl;
+                std::cout << ecache_;
             }
 
             finish_action_group_.setNextActionGroup(&stop_sim_action_group_);
@@ -1097,8 +1082,8 @@ namespace pegasus
             sim_state_.test_passed = true;
 
             finish_action_group_.setNextActionGroup(
-                ecache_enabled_ ? execute_unit_->getNextCycleResetActionGroup()
-                                : fetch_unit_->getActionGroup());
+                ecache_.isEnabled() ? execute_unit_->getNextCycleResetActionGroup()
+                                    : fetch_unit_->getActionGroup());
         }
     }
 
