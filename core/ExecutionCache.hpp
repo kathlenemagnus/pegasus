@@ -1,5 +1,7 @@
 #pragma once
 
+#include "core/ExecutionPage.hpp"
+
 namespace pegasus
 {
     class ExecutionCache
@@ -8,7 +10,16 @@ namespace pegasus
         ExecutionCache(const bool ecache_stats) : ecache_stats_(ecache_stats) {}
 
         // Request a translated execution-page cache flush at the next safe fetch boundary.
-        void flushExecutionCache() { execution_cache_flush_requested_ = true; }
+        void requestExecutionCacheFlush() { execution_cache_flush_requested_ = true; }
+
+        // Flushes the execution cache by clearing the VA-index owning table.
+        // Clears translated execution-page cache and VA-index structure.
+        void flushExecutionCache() { execution_page_table_.clear(); }
+
+        ActionGroup* lookupExecutionPageGroup(const Addr vaddr) const;
+
+        ActionGroup* registerExecutionPageResult(PegasusState* state, const Addr vaddr,
+                                                 const Addr paddr, const Addr page_size);
 
         // Returns true exactly once per request and clears the pending flag.
         bool consumeExecutionCacheFlushRequest()
@@ -89,6 +100,13 @@ namespace pegasus
 
         //! Print execution-cache counter summary when simulation stops
         const bool ecache_stats_;
+
+        // Two-level VA lookup table indexed with (VA >> 12), matching Sv39 page table bitmasking
+        // The table owns pages via shared_ptr so superpage spans can reference
+        // the same ExecutionPage from multiple VA L0 entries.
+        using ExecutionPageL0Table = std::unordered_map<Addr, std::shared_ptr<ExecutionPage>>;
+        using ExecutionPageL1Table = std::unordered_map<Addr, ExecutionPageL0Table>;
+        std::unordered_map<Addr, ExecutionPageL1Table> execution_page_table_;
 
         // Execution cache decision counters
         uint64_t exec_cache_reuse_count_ = 0;

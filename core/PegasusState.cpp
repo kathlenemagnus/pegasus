@@ -103,7 +103,7 @@ namespace pegasus
         ilimit_(getInstLimit(hart_tn->getRoot(), p->ilimit)),
         quantum_(p->quantum),
         stop_sim_on_wfi_(p->stop_sim_on_wfi),
-        ecache_(p->ecache_stats),
+        exe_cache_(p->exe_cache_stats),
         ulimit_stack_size_(p->ulimit_stack_size),
         stf_filename_(p->stf_filename),
         stf_opcode_trigger_(p->stf_opcode_trigger),
@@ -292,7 +292,7 @@ namespace pegasus
 
         if (fetch_unit_->isEcacheEnabled())
         {
-            ecache_.enable();
+            exe_cache_.enable();
 
             // When Ecache is enabled, wire finish -> nextCycleReset -> Translate.
             // NCR owns the sim_state->reset() call
@@ -473,7 +473,7 @@ namespace pegasus
         }
 
         // Translation-context changes can invalidate decoded execute-page assumptions.
-        ecache_.flushExecutionCache();
+        exe_cache_.flushExecutionCache();
     }
 
     void PegasusState::pauseHart(const SimPauseReason reason)
@@ -486,7 +486,7 @@ namespace pegasus
     {
         sim_state_.sim_pause_reason = SimPauseReason::INVALID;
         // Restore finish → NCR (ecache on) or finish → fetch (ecache off).
-        finish_action_group_.setNextActionGroup(ecache_.isEnabled()
+        finish_action_group_.setNextActionGroup(exe_cache_.isEnabled()
                                                     ? execute_unit_->getNextCycleResetActionGroup()
                                                     : fetch_unit_->getActionGroup());
     }
@@ -1044,9 +1044,9 @@ namespace pegasus
             sim_state_.workload_exit_code = exit_code;
             sim_state_.test_passed = (exit_code == 0) ? true : false;
 
-            if (ecache_.areStatsEnabled())
+            if (exe_cache_.areStatsEnabled())
             {
-                std::cout << ecache_;
+                std::cout << exe_cache_;
             }
 
             finish_action_group_.setNextActionGroup(&stop_sim_action_group_);
@@ -1060,8 +1060,8 @@ namespace pegasus
             sim_state_.test_passed = true;
 
             finish_action_group_.setNextActionGroup(
-                ecache_.isEnabled() ? execute_unit_->getNextCycleResetActionGroup()
-                                    : fetch_unit_->getActionGroup());
+                exe_cache_.isEnabled() ? execute_unit_->getNextCycleResetActionGroup()
+                                       : fetch_unit_->getActionGroup());
         }
     }
 

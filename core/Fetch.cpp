@@ -30,7 +30,7 @@ namespace pegasus
     {
         if (state_ != nullptr)
         {
-            state_->getTranslateUnit()->flushExecutionCache();
+            state_->getExecutionCache()->flushExecutionCache();
         }
     }
 

@@ -71,7 +71,7 @@ namespace pegasus
         if (SPARTA_EXPECT_FALSE(exe_cache->consumeExecutionCacheFlushRequest()))
         {
             exe_cache->recordExecCacheBypassFallback();
-            state->getTranslateUnit()->flushExecutionCache();
+            state->getExecutionCache()->flushExecutionCache();
             state->getNextCycleResetActionGroup()->setNextActionGroup(fetch_action_group_);
             translated_page_group_.setNextActionGroup(fetch_action_group_);
             return ++action_it;

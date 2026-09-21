@@ -255,7 +255,7 @@ namespace pegasus
         // Only perform the flush/reroute when exec-cache mode is enabled.
         if (state->getFetchUnit()->isEcacheEnabled())
         {
-            state->getExecutionCache()->flushExecutionCache();
+            state->getExecutionCache()->requestExecutionCacheFlush();
             state->getNextCycleResetActionGroup()->setNextActionGroup(
                 state->getFetchUnit()->getActionGroup()->getNextActionGroup());
         }

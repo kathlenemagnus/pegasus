@@ -88,7 +88,7 @@ namespace pegasus
             PARAMETER(uint32_t, ilimit, 0, "Instruction limit for stopping simulation")
             PARAMETER(uint32_t, quantum, 500, "Instruction quantum size")
             PARAMETER(bool, stop_sim_on_wfi, false, "Executing a WFI instruction stops simulation")
-            PARAMETER(bool, ecache_stats, false,
+            PARAMETER(bool, exe_cache_stats, false,
                       "Print execution-cache reuse counters/ratio when the hart stops")
             // Typical stack pointer is 8KB on most linux systems
             PARAMETER(uint32_t, ulimit_stack_size, 8192,
@@ -395,9 +395,9 @@ namespace pegasus
 
         ActionGroup* getNextCycleResetActionGroup();
 
-        bool isEcacheEnabled() const { return ecache_.isEnabled(); }
+        bool isEcacheEnabled() const { return exe_cache_.isEnabled(); }
 
-        ExecutionCache* getExecutionCache() { return &ecache_; }
+        ExecutionCache* getExecutionCache() { return &exe_cache_; }
 
         ActionGroup* getStopSimActionGroup() { return &stop_sim_action_group_; }
 
@@ -469,7 +469,7 @@ namespace pegasus
         const bool stop_sim_on_wfi_;
 
         //! Execution cache (ecache) fast path is enabled
-        ExecutionCache ecache_;
+        ExecutionCache exe_cache_;
 
         //! Typical stack size for system call emulation
         const uint64_t ulimit_stack_size_;
@@ -623,19 +623,6 @@ namespace pegasus
 
         // MessageSource used for STFValidator
         sparta::log::MessageSource stf_valid_logger_;
-
-        // Execution cache decision counters
-        uint64_t exec_cache_reuse_count_ = 0;
-        uint64_t exec_cache_first_decode_count_ = 0;
-        uint64_t exec_cache_bypass_enter_count_ = 0;
-        uint64_t exec_cache_bypass_fallback_count_ = 0;
-        uint64_t exec_cache_pte_bypass_setup_count_ = 0;
-        uint64_t translation_request_count_ = 0;
-        uint64_t translation_bypass_count_ = 0;
-        uint64_t page_walk_translation_count_ = 0;
-
-        // Deferred cache flush flag to avoid invalidating active action groups mid-execution.
-        bool execution_cache_flush_requested_ = false;
 
         // Finish ActionGroup for post-execute simulator Actions
         ActionGroup finish_action_group_;

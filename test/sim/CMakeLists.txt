@@ -34,7 +34,7 @@ pegasus_named_test(pegasus_syscall_test pegasus ${LINUX_ARCH_SETUP} "workloads/s
 
 # Execution cache test
 set (EXE_CACHE_PARAMS -p top.core0.hart0.fetch.params.enable_ecache true
-                      -p top.core0.hart0.params.ecache_stats true)
+                      -p top.core0.hart0.params.exe_cache_stats true)
 pegasus_named_test(pegasus_dhry_test_exe_cache pegasus ${LINUX_ARCH_SETUP} ${EXE_CACHE_PARAMS} workloads/rv64_dhry.elf)
 
 # Logging tests
