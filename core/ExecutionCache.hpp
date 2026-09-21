@@ -5,9 +5,7 @@ namespace pegasus
     class ExecutionCache
     {
       public:
-        ExecutionCache(const bool ecache_stats) :
-           ecache_stats_(ecache_stats)
-        {}
+        ExecutionCache(const bool ecache_stats) : ecache_stats_(ecache_stats) {}
 
         // Request a translated execution-page cache flush at the next safe fetch boundary.
         void flushExecutionCache() { execution_cache_flush_requested_ = true; }
@@ -115,19 +113,16 @@ namespace pegasus
         const uint64_t first_decode_count = ecache.getExecCacheFirstDecodeCount();
         const uint64_t total_decisions = reuse_count + first_decode_count;
         os << "Execution Cache statistics" << std::endl;
-        os << "\tExecCache decisions: " << total_decisions
-           << " (reuse=" << reuse_count << ", first_decode = " << first_decode_count
-           << ")" << std::endl;
+        os << "\tExecCache decisions: " << total_decisions << " (reuse=" << reuse_count
+           << ", first_decode = " << first_decode_count << ")" << std::endl;
         os << "\tExecCache reuse ratio: " << ecache.getExecCacheReuseRatio() << std::endl;
         os << "\tExecCache bypass: enter = " << ecache.getExecCacheBypassEnterCount()
            << ", fallback = " << ecache.getExecCacheBypassFallbackCount()
            << ", pTE_setup = " << ecache.getExecCachePteBypassSetupCount() << std::endl;
-        os << "\tTranslation requests: " << ecache.getTranslationRequestCount()
+        os << "\tTranslation requests: " << ecache.getTranslationRequestCount() << std::endl;
+        os << "\tTranslation bypass (machine/baremetal): " << ecache.getTranslationBypassCount()
            << std::endl;
-        os << "\tTranslation bypass (machine/baremetal): "
-           << ecache.getTranslationBypassCount() << std::endl;
-        os << "\tMMU page-walk translations: " << ecache.getPageWalkTranslationCount()
-           << std::endl;
+        os << "\tMMU page-walk translations: " << ecache.getPageWalkTranslationCount() << std::endl;
 
         return os;
     }

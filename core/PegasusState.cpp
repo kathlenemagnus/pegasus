@@ -251,28 +251,6 @@ namespace pegasus
         vector_config_.checkConfig();
     }
 
-    // Execute cache stats
-    void PegasusState::recordExecCacheDecision(bool instruction_reuse)
-    {
-        if (instruction_reuse)
-        {
-            ++exec_cache_reuse_count_;
-        }
-        else
-        {
-            ++exec_cache_first_decode_count_;
-        }
-    }
-
-    void PegasusState::flushExecutionCache() { execution_cache_flush_requested_ = true; }
-
-    bool PegasusState::consumeExecutionCacheFlushRequest()
-    {
-        const bool do_flush = execution_cache_flush_requested_;
-        execution_cache_flush_requested_ = false;
-        return do_flush;
-    }
-
     mavis::FileNameListType PegasusState::getUArchFiles_() const
     {
         mavis::FileNameListType uarch_files;

@@ -316,7 +316,7 @@ namespace pegasus
         // back to normal translation Width in bytes for logging
         const uint32_t width = std::is_same_v<XLEN, RV64> ? 16 : 8;
         DLOG("Starting " << STAGE << " translation for VA: " << HEX(vaddr, width));
-        state->recordTranslationRequest();
+        state->getExecutionCache()->recordTranslationRequest();
 
         uint32_t level = translate_types::getNumPageWalkLevels<MODE>();
         const auto priv_mode = (TYPE == translate_types::AccessType::EXECUTE)
@@ -326,11 +326,11 @@ namespace pegasus
         // See if translation is disable -- no level walks
         if (level == 0 || (priv_mode == PrivMode::MACHINE))
         {
-            state->recordTranslationBypass();
+            state->getExecutionCache()->recordTranslationBypass();
             return setResult_<XLEN, STAGE, MODE, TYPE>(state, translation_state, action_it, vaddr);
         }
 
-        state->recordPageWalkTranslation();
+        state->getExecutionCache()->recordPageWalkTranslation();
 
         // Smallest page size is 4K for both RV32 and RV64
         constexpr uint64_t PAGESHIFT = 12; // 4096

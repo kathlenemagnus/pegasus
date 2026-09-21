@@ -56,7 +56,7 @@ namespace pegasus
     {
         ILOG("Fetching PC 0x" << std::hex << state->getPc());
 
-        if (state->consumeExecutionCacheFlushRequest())
+        if (state->getExecutionCache()->consumeExecutionCacheFlushRequest())
         {
             flushExecutionCache();
         }

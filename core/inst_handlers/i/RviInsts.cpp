@@ -1126,7 +1126,7 @@ namespace pegasus
         }
 
         // Conservatively flush translated execution pages on fences.
-        state->flushExecutionCache();
+        state->getExecutionCache()->flushExecutionCache();
 
         return ++action_it;
     }

@@ -430,7 +430,7 @@ namespace pegasus
                                                     Action::ItrType action_it)
     {
         state->updateTranslationMode<XLEN>(TYPE);
-        state->flushExecutionCache();
+        state->getExecutionCache()->flushExecutionCache();
         return ++action_it;
     }
 
