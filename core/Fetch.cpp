@@ -183,6 +183,16 @@ namespace pegasus
             state->getFetchTranslationState()->popRequest();
         }
 
+        // Check for illegal inst exceptions
+        isInstLegal(state, inst);
+
+        state->getFetchTranslationState()->popResult();
+
+        return ++action_it;
+    }
+
+    void Fetch::isInstLegal(PegasusState* state, const PegasusInstPtr inst)
+    {
         // Check if Zvfh/Zvfhmin are enabled for vector BF16 support
         if (SPARTA_EXPECT_FALSE(inst->isVector() && inst->isFloat()
                                 && (state->getVectorConfig()->getSEW() == 16)))
@@ -215,8 +225,5 @@ namespace pegasus
                 }
             }
         }
-        state->getFetchTranslationState()->popResult();
-
-        return ++action_it;
     }
 } // namespace pegasus

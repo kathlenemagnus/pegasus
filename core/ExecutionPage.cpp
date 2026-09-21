@@ -333,28 +333,7 @@ namespace pegasus
             THROW_ILLEGAL_INST;
         }
 
-        if (SPARTA_EXPECT_FALSE(inst->hasCsr()))
-        {
-            const uint32_t csr =
-                inst->getMavisOpcodeInfo()->getSpecialField(mavis::OpcodeInfo::SpecialField::CSR);
-            if (state->getCsrRegister(csr) == nullptr)
-            {
-                THROW_ILLEGAL_INST;
-            }
-
-            // TODO: This is probably not the best place for this check...
-            if (csr == SATP)
-            {
-                if (state->getPrivMode() == PrivMode::SUPERVISOR)
-                {
-                    auto tvm_val = READ_CSR_FIELD<RV64>(state, MSTATUS, "tvm");
-                    if (tvm_val)
-                    {
-                        THROW_ILLEGAL_INST;
-                    }
-                }
-            }
-        }
+        state->getFetchUnit()->isInstLegal(state, inst);
 
         // translatedPageExecute Bypass:
         // If the instruction is guaranteed to remain within the page i.e not control flow
